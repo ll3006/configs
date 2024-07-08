@@ -1,0 +1,61 @@
+website:
+  metadata:
+    display_name: Manganato
+    key: manganato
+  match: # These need to be ordered by descending specificity  
+    - https://chapmanganato\.to/manga-(?P<series>[a-z0-9]*)/chapter-(?P<chapter>.*?)(?:[/?#].*|)$
+    # - manganato.com chapter url?
+    - https://manganato\.com/manga-(?P<series>[a-z0-9]*)
+    - https://chapmanganato\.to/manga-(?P<series>[a-z0-9]*)
+  series:
+    chapters:
+      params:
+        - series
+      parsers:
+        - type: request
+          urls:
+            - https://manganato.com/manga-{series}
+            - https://chapmanganato.to/manga-{series}
+          selectors:
+            - type: css
+              query: .row-content-chapter > li > a.chapter-name
+              pipeline:
+                - props:
+                  - href
+                - match:
+                - props:
+                    - chapter
+                - reverse:
+    title:
+      params:
+        - series
+      parsers:
+        - type: request
+          urls:
+            - https://manganato.com/manga-{series}
+            - https://chapmanganato.to/manga-{series}
+          output: single
+          selectors:
+            - type: css
+              query: .story-info-right > h1
+              pipeline:
+                - props:
+                    - text
+  chapter:
+    pages:
+      params:
+        - series
+        - chapter
+      parsers:
+        - type: request
+          urls:
+            - https://chapmanganato.to/manga-{series}/chapter-{chapter}
+          selectors:
+            - type: css
+              query: .container-chapter-reader > img
+              pipeline:
+                - props:
+                    - src
+                # TODO: allow some global config for the proxy url
+                # Maybe even add a "proxy" key
+                - format: "http://localhost:8080/proxy/?header=Referer:https://chapmanganato.to/&url={}"

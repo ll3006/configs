@@ -1,0 +1,29 @@
+website:
+  metadata:
+    base: https://kaijuno8.net/
+    display_name: Kaijuno8.net
+    key: "kaijuno8net"
+  match:
+    - https://kaijuno8\.net/chapter/(?P<chapter>.*?)(?:[/?].*|)$
+  series:
+    title:
+      static: "Kaiju N.8"
+    cover:
+      parsers:
+        - type: request
+          urls:
+            - /
+          selectors:
+            - type: regex
+              query: '"image":"(/images/cover/.*)"'
+  chapter:
+    pages:
+      params:
+        - chapter
+      parsers:
+        - type: request
+          urls:
+            - /chapter/{chapter}
+          selectors:
+            - type: regex
+              query: (https:\/\/official.lowee.us\/manga\/Monster-8\/.*?\.png)

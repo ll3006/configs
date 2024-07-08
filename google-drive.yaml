@@ -1,0 +1,24 @@
+website:
+  metadata:
+    base: 'https://drive.google.com/'
+    key: 'google-drive'
+    display_name: 'Google drive'
+    languages: ["unknown"]
+  match:
+    - https://drive\.google\.com/drive/folders/(?P<folderId>.*?)(?:[/?].*|)$
+  chapter:
+    pages:
+      params:
+        - folderId
+      parsers:
+        - type: request
+          urls:
+            - /drive/folders/{folderId}
+          selectors:
+            - type: css
+              query:
+                c-wiz > div[data-id]
+              pipeline:
+                - props:
+                  - data-id
+                - format: "https://lh3.googleusercontent.com/d/{}"
