@@ -56,6 +56,5 @@ website:
               pipeline:
                 - props:
                     - src
-                # TODO: allow some global config for the proxy url
-                # Maybe even add a "proxy" key
-                - format: "http://localhost:8080/proxy/?header=Referer:https://chapmanganato.to/&url={}"
+                - proxy:
+                    referer: https://chapmanganato.to/
