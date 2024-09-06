@@ -53,4 +53,5 @@ website:
         - props:
             - src
         - proxy:
-            referer: https://chapmanganato.to/
+            headers:
+              referer: https://chapmanganato.to/
