@@ -4,79 +4,70 @@ website:
     display_name: Rawkuma
     key: rawkuma
     languages: ["japanese"]
+  
   match:
     - https://rawkuma\.com/(?P<series>.*?)-chapter-(?P<chapter>.*?)(?:[/?].*|)$
     - https://rawkuma\.com/manga/(?P<series>.*?)(?:[/?].*|)$
+  
   series:
+    fetcher:
+      params:
+        - series
+      type: request
+      urls: 
+        - /manga/{series}
     chapters:
-      params:
-        - series
-      parsers:
-        - type: request
-          urls: 
-            - /manga/{series}
-          selectors:
-            - type: css
-              query: '#chapterlist li'
-              pipeline:
-                - props:
-                  - data-num
-                - reverse:
+      selector:
+        type: css
+        query: '#chapterlist li'
+        pipeline:
+          - props:
+            - data-num
+          - reverse:
     cover:
-      params:
-        - series
-      parsers:
-        - type: request
-          urls:
-            - /manga/{series}
-          output: single
-          selectors:
-            - type: css
-              query: .thumbook .thumb img
-              pipeline:
-                - props:
-                  - src
+     selector:
+        type: css
+        output: single
+        query: .thumbook .thumb img
+        pipeline:
+          - props:
+            - src
     title:
-      params:
-        - series
-      parsers:
-        - type: request
-          urls:
-            - /manga/{series}
-          output: single
-          selectors:
-            - type: css
-              query: .ts-breadcrumb.bixbox > div > span:last-child > a > span[itemprop=name]
-              pipeline:
-                - props:
-                    - text
-  chapter:
-    pages:
+      selector:
+        type: css
+        output: single
+        query: .ts-breadcrumb.bixbox > div > span:last-child > a > span[itemprop=name]
+        pipeline:
+          - props:
+              - text
+  
+  images:
+    fetcher:
       params:
         - series
         - chapter
-      parsers:
-        - type: request
-          urls:
-          - /{series}-chapter-{chapter}
-          selectors:
-            - type: css
-              query: '#readerarea img'
-              pipeline:
-                - props:
-                  - src
+      type: request
+      urls:
+        - /{series}-chapter-{chapter}
+    selector:
+      type: css
+      query: '#readerarea img'
+      pipeline:
+        - props:
+          - src
+  
   search:
-    series:
+    fetcher:
       params:
         - query
-      parsers:
-        - type: request
-          urls: 
-            - /?s={query}
-          selectors:
-            - type: css
-              query: .bs > .bsx a
-              pipeline:
-                - props: 
-                  - href
-                - regex: https://rawkuma\.com/manga/(.*?)/
+      type: request
+      urls: 
+        - /?s={query}
+    series:
+      selector:
+        type: css
+        query: .bs > .bsx a
+        pipeline:
+          - props: 
+            - href
+          - regex: https://rawkuma\.com/manga/(.*?)/

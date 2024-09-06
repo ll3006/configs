@@ -4,79 +4,70 @@ website:
     base: https://retsu.org
     key: retsuorg
     languages: ["english"]
+  
   match:
     - https://retsu\.org/manga/(?P<series>.*?)/(?:ch|chapter)-(?P<chapter>.*?)(?:[/?].*|)$
     - https://retsu\.org/manga/(?P<series>.*?)(?:[/?].*|)$
+  
   series:
+    fetcher:
+      params:
+        - series
+      type: request
+      urls: 
+        - /manga/{series}
     cover:
-      params:
-        - series
-      parsers:
-        - type: request
-          urls: 
-            - /manga/{series}
-          selectors:
-            - type: css 
-              query: .summary_image img
-              output: single
-              pipeline:
-                - props:
-                  - data-src
-                  - src
+      selector:
+        type: css 
+        query: .summary_image img
+        output: single
+        pipeline:
+          - props:
+            - data-src
+            - src
     chapters:
-      params:
-        - series
-      parsers:
-        - type: request
-          urls: 
-            - /manga/{series}
-          selectors:
-            - type: css
-              query: .wp-manga-chapter > a
-              pipeline:
-                - props:
-                  - href
-                - match:
-                - props:
-                  - chapter
-  chapter:
-    pages:
+      selector:
+        type: css
+        query: .wp-manga-chapter > a
+        pipeline:
+          - props:
+            - href
+          - match:
+          - props:
+            - chapter
+  
+  images:
+    fetcher:
       params:
         - series
         - chapter
-      parsers:
-        - type: request
-          urls:
-            -  /manga/{series}/ch-{chapter:0>3}
-            -  /manga/{series}/chapter-{chapter}
-          selectors:
-            - type: css
-              query: .reading-content img
-              pipeline:
-                - props:
-                    - data-src
-                - replace:
-                    - ["\t", '']
-                    - ["\n", '']
-        -
-          type: network
-          urls:
-            -  /manga/{series}/ch-{chapter:03d}
-            -  /manga/{series}/chapter-{chapter}
-          filters:
-            - url: https:\/\/rs\.jinbei\.my\.id\/manga_.*.jpg
+      type: request
+      urls:
+        -  /manga/{series}/ch-{chapter:0>3}
+        -  /manga/{series}/chapter-{chapter}
+    selector:
+      type: css
+      query: .reading-content img
+      pipeline:
+        - props:
+            - data-src
+        - replace:
+            - ["\t", '']
+            - ["\n", '']
+  
   search:
-    series:
+    fetcher:
       params:
-        - query
-      parsers:
-        - type: request
-          urls: 
-            - /?s={query}&post_type=wp-manga
-          selectors:
-            - type: css
-              query: .manga__item > .manga__content a
-              pipeline:
-                - props: 
-                  - href
-                - regex: https://retsu\.org/manga/(.*?)/
+            - query
+      type: request
+      urls: 
+        - /?s={query}&post_type=wp-manga
+    
+    series:
+      selector:
+        type: css
+        query: .manga__item > .manga__content a
+        pipeline:
+          - props: 
+            - href
+          - regex: https://retsu\.org/manga/(.*?)/

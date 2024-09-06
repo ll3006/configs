@@ -7,54 +7,50 @@ website:
     # - manganato.com chapter url?
     - https://manganato\.com/manga-(?P<series>[a-z0-9]*)
     - https://chapmanganato\.to/manga-(?P<series>[a-z0-9]*)
+  
+  
   series:
+    fetcher:
+      params:
+        - series
+      type: request
+      urls:
+        - https://manganato.com/manga-{series}
+        - https://chapmanganato.to/manga-{series}
+    
     chapters:
-      params:
-        - series
-      parsers:
-        - type: request
-          urls:
-            - https://manganato.com/manga-{series}
-            - https://chapmanganato.to/manga-{series}
-          selectors:
-            - type: css
-              query: .row-content-chapter > li > a.chapter-name
-              pipeline:
-                - props:
-                  - href
-                - match:
-                - props:
-                    - chapter
-                - reverse:
+      selector:
+        type: css
+        query: .row-content-chapter > li > a.chapter-name
+        pipeline:
+          - props:
+            - href
+          - match:
+          - props:
+              - chapter
+          - reverse:
     title:
-      params:
-        - series
-      parsers:
-        - type: request
-          urls:
-            - https://manganato.com/manga-{series}
-            - https://chapmanganato.to/manga-{series}
-          output: single
-          selectors:
-            - type: css
-              query: .story-info-right > h1
-              pipeline:
-                - props:
-                    - text
-  chapter:
-    pages:
+      selector:
+        type: css
+        output: single
+        query: .story-info-right > h1
+        pipeline:
+          - props:
+              - text
+              
+  images:
+    fetcher:
       params:
         - series
         - chapter
-      parsers:
-        - type: request
-          urls:
-            - https://chapmanganato.to/manga-{series}/chapter-{chapter}
-          selectors:
-            - type: css
-              query: .container-chapter-reader > img
-              pipeline:
-                - props:
-                    - src
-                - proxy:
-                    referer: https://chapmanganato.to/
+      type: request
+      urls:
+        - https://chapmanganato.to/manga-{series}/chapter-{chapter}
+    selector:
+      type: css
+      query: .container-chapter-reader > img
+      pipeline:
+        - props:
+            - src
+        - proxy:
+            referer: https://chapmanganato.to/
