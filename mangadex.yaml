@@ -1,0 +1,84 @@
+website:
+  metadata:
+    base: https://api.mangadex.org/
+    display_name: Mangadex
+    key: mangadex
+    
+  match:
+    - https://mangadex.org/title/(?P<series>[0-9a-f\-]*)
+    - https://mangadex.org/chapter/(?P<chapter>[0-9a-f\-]*)
+      
+  series:
+    fetcher:
+      params:
+        - series
+      type: request
+      urls:
+        - /manga/{series}/?includes[]=cover_art    
+    
+    chapters:  
+      fetcher:
+        params:
+          - series
+        type: request
+        urls:
+          - /manga/{series}/feed
+      selector:
+        type: json
+        pipeline:
+          - prop: data
+          - filter:
+              - has:
+                  - key: type
+                    value: chapter
+              - prop: attributes
+              - has:
+                  - key: translatedLanguage
+                    value: en
+          - prop: id
+    
+    title:
+      selector:
+        type: json
+        output: single
+        pipeline:
+          - prop: data
+          - prop: attributes
+          - prop: title
+          - prop: en
+    
+    cover:
+      selector:
+        type: json
+        output: single
+        pipeline:
+          - prop: data
+          - prop: id
+          - save: series
+          
+          - reset:
+          - prop: data
+          - prop: relationships
+          - has:
+            - key: type
+              value: cover_art
+          - prop: attributes
+          - prop: fileName
+          - format: "https://uploads.mangadex.org/covers/{series}/{}"
+  images:
+    fetcher:
+      params:
+        - chapter
+      type: request
+      urls:
+        - /at-home/server/{chapter}?includes[]=scanlation_group
+    selector:
+      type: json
+      pipeline:
+        - format: "{baseUrl}/data/{chapter[hash]}"
+        - save: base
+        - reset:
+        - prop: chapter
+        - prop: data
+        - format: "{base}/{}"
+      
